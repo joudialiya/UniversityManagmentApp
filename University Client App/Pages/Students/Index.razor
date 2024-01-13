@@ -1,0 +1,60 @@
+﻿@page "/students"
+@inject HttpClient client
+@using Entities;
+@code {
+    public string baseURI { get; set; } = "/api/Students/";
+    List<Student>? list = null;
+    protected override async Task OnInitializedAsync()
+    {
+        list = await client.GetFromJsonAsync<List<Student>>("/api/Students");
+    }
+
+    public async void onClickDelete(int key)
+    {
+        await client.DeleteAsync(baseURI + key);
+        await this.OnInitializedAsync();
+        StateHasChanged();
+    }
+}
+
+<h3>List des etudiants</h3>
+<br />
+<a class="btn btn-sm btn-warning" href="/students/create"><i class="bi bi-plus-circle"></i> Ajouter</a>
+<br />
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Prenom</th>
+            <th>Nom</th>
+            <th>Date d'inscription</th>
+            <th>Operations</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (list != null)
+        @foreach (var student in list)
+        {
+            <tr> 
+                <td>@(student.ID)</td>
+                <td>@(student.FirstMidName)</td>
+                <td>@(student.LastName)</td>
+                <td>@(student.EnrollmentDate)</td>
+                <td>
+                        <a class="btn btn-sm btn-danger" href="/students" @onclick="() => onClickDelete(student.ID)">
+                            <i class="bi bi-trash"></i> Delete
+                        </a>
+                        <a class="btn btn-sm btn-success" href="/students/edit/@(student.ID)">
+                            <i class="bi bi-pen"></i> Edit
+                        </a>
+                        <a class="btn btn-sm btn-info" href="/students/enrollements/@student.ID">
+                            <i class="bi bi-info-circle"></i> Details
+                        </a>
+
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+

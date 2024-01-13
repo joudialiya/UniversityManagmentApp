@@ -1,0 +1,100 @@
+﻿<h3>Les informations de @model?.LastName @model?.FirstMidName</h3>
+<br />
+<table class="table text-center table-sm">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nom</th>
+            <th>Prenom</th>
+        </tr>
+    </thead>
+    <tbody>
+            @if (model != null)
+            {
+                <tr>
+                    <td>@model.ID</td>
+                    <td>@model.LastName</td>
+                    <td>@model.FirstMidName</td>
+                </tr>
+            }
+    </tbody>
+</table>
+<br/>
+<h4>List ses cours</h4>
+<table class="table table-striped">
+ 
+    <thead>
+        <tr>
+            <th>Identifiant du cours</th>
+            <th>Designation du cours</th>
+            <th>Grade</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (model != null && model.Enrollments != null)
+        {
+            @foreach (var enrollements in model.Enrollments)
+            {
+                <tr>
+                    <td>
+                        @enrollements.CourseID
+                    </td>
+                    <td>
+                        @listCourses.First(c => c.CourseID == enrollements.CourseID).Title
+                    </td>
+                    <td>
+                        @enrollements.Grade
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+<br/>
+<form class="form" @onsubmit=onSubmit>
+    <div>
+        <label>Identifiant du cours</label>
+        <select class="form-control" @bind=selectedCours>
+            @if (listCourses != null)
+            @foreach(var course in listCourses)
+            {
+                <option value="@course.CourseID">(@course.CourseID) @course.Title</option>
+            }
+        </select>
+    </div>
+    <br/>
+    <input class="form-control btn btn-info" type="submit" value="Ajouter le cours"/>
+</form>
+
+@page "/students/enrollements/{key}"
+@inject HttpClient client
+@using Entities
+@code {
+    [Parameter]
+    public string key { get; set; }
+    public Student? model { get; set; }
+    public string baseURI = "/api/Students/";
+    public List<Course>? listCourses;
+    public string? selectedCours;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Console.WriteLine(await client.GetStringAsync(baseURI + key));
+        model = await client.GetFromJsonAsync<Student>(baseURI + key);
+        listCourses = await client.GetFromJsonAsync<List<Course>>("api/Courses");
+    }
+    private async void onSubmit()
+    {
+        if (selectedCours != null)
+        {
+            Course? course = listCourses.Find((c) => c.CourseID == int.Parse(selectedCours));
+            Enrollment enrollement = new Enrollment();
+            enrollement.StudentID = model.ID;
+            enrollement.CourseID = course.CourseID;
+
+            Console.WriteLine(model.Enrollments);
+            await client.PostAsJsonAsync<Enrollment>("/api/Enrollments/", enrollement);
+            StateHasChanged();
+        }
+    }
+}

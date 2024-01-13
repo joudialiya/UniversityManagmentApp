@@ -1,0 +1,52 @@
+﻿<form class="form p-5" @onsubmit=executeOnSubmit>
+    @if (course != null)
+    {
+        <div>
+            <label for="CourseID">Identifier</label><br />
+            <input class="form-control" id="CourceID" @bind=course.CourseID />
+        </div>
+        <div>
+            <label for="Title">Titre</label><br />
+            <input class="form-control" id="Title" @bind=course.Title />
+        </div>
+        <div>
+            <label for="Credits">Credits</label><br />
+            <input class="form-control" id="Credits" @bind=course.Credits />
+        </div>
+        <div>
+            <label for="Teacher">Formateur</label><br />
+            <select class="form-control" id="Teacher" @bind=course.TeacherID>
+                <option>None</option>
+                @if (ListTeacher != null)
+                    @foreach (var teacher in ListTeacher)
+                    {
+                        <option value="@teacher.ID">@teacher.Name</option>
+                    }
+            </select>
+        </div>
+        <br />
+        <button class="form-control btn btn-success" type="submit">Ajouter</button>
+    }
+</form>
+
+<a href="/courses">Back</a>
+@using Entities
+@inject HttpClient client
+@code {
+    [Parameter]
+    public Course? course { get; set; }
+    public ICollection<Teacher>? ListTeacher { get; set; }
+
+    [Parameter]
+    public Action<Course> onSubmit { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        ListTeacher = await client.GetFromJsonAsync<ICollection<Teacher>>("/api/Teachers");
+    }
+    public void executeOnSubmit()
+    {
+        onSubmit.Invoke(course);
+    }
+}
+
+

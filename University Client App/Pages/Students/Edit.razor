@@ -1,0 +1,26 @@
+﻿<h3>Editer les informations de l'etudiant(e) [ @model?.FirstMidName @model?.LastName ]</h3>
+
+@if (model != null)
+{
+    <Form model=@(model) onSubmit=onSubmit />
+}
+@page "/students/edit/{key}"
+@inject HttpClient client
+@using Entities
+@code {
+    public string baseURI = "/api/Students/";
+    [Parameter]
+    public string key { get; set; }
+
+    Student? model;
+    protected override async Task OnInitializedAsync()
+    {
+        Console.WriteLine("get");
+        model = await client.GetFromJsonAsync<Student>(baseURI + key);
+    }
+    public async void onSubmit(Student model)
+    {
+        Console.WriteLine("post");
+        await client.PutAsJsonAsync<Student>(baseURI + key, model);
+    }
+}

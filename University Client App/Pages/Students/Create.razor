@@ -1,0 +1,15 @@
+﻿<h3>Formulaire de l'ajoute d'un etudiant</h3>
+
+<Form model=@(new Student()) onSubmit=onSubmit />
+
+@page "/students/create"
+@inject HttpClient client
+@using Entities
+@code {
+
+    public async void onSubmit(Student student)
+    {
+        Console.WriteLine("post");
+        await client.PostAsJsonAsync<Student>("/api/Students", student);
+    }
+}

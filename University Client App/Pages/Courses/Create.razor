@@ -1,0 +1,16 @@
+﻿<h3>Formulaire de l'ajoute d'un cours</h3>
+
+<Form course=@(new Course()) onSubmit=onSubmit />
+
+@page "/courses/create"
+@inject HttpClient client
+@using Entities
+@code {
+
+    public async void onSubmit(Course course)
+    {
+        course.Enrollments = new List<Enrollment>();
+        Console.WriteLine("post");
+        await client.PostAsJsonAsync<Course>("/api/Courses", course);
+    }
+}

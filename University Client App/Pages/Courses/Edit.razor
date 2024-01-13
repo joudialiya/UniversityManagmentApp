@@ -1,0 +1,23 @@
+﻿<h3>Editer le cours [@course?.Title]</h3>
+
+<Form course=@(course) onSubmit=onSubmit />
+
+@page "/courses/edit/{key}"
+@inject HttpClient client
+@using Entities
+@code {
+    [Parameter]
+    public string key { get; set; }
+
+    Course? course;
+    protected override async Task OnInitializedAsync()
+    {
+        course = await client.GetFromJsonAsync<Course>("/api/Courses/" + key);
+    }
+    public async void onSubmit(Course course)
+    {
+        course.Enrollments = new List<Enrollment>();
+        Console.WriteLine("post");
+        await client.PutAsJsonAsync<Course>("/api/Courses/" + key, course);
+    }
+}
